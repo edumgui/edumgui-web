@@ -1,0 +1,152 @@
+<html>
+	<head>
+		<title>edumgui.cloud</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body>
+		<!-- Wrapper -->
+			<div id="wrapper">
+				<p>
+					And you will be asking, why would you want to put a static website on a pod?
+					<br>
+					Just for learning purposes.
+				</p>
+				<h3>How did you installed Kubernets on an Ubuntu VPS?</h3>
+				<ol>
+					<li>
+						Take a look at the official documentation:
+						<br>
+						<a href="https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/" target="_blank" style="text-decoration: underline;">
+						Kubernetes.io - Creating a single master cluster with kubeadm</a>
+					</li>
+					<li>
+						Upgrade installed packages:
+						<br>
+						<code class="bash">
+						sudo apt update && apt upgrade
+						</code>
+					</li>
+					<li>
+						Open Kubernetes API server port on the firewall:
+						<br>
+						<code class="bash">
+						sudo ufw allow 6443/tcp #UFW example
+						</code>
+					</li>
+					<li>
+						Install Docker:
+						<br>
+						<a href="https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/util/system/docker_validator_test.go#L65" target="_blank" style="text-decoration: underline;">
+						Check last supported Docker version for Kubernetes</a>
+						<br>
+						Add APT repository:
+						<br>
+						<code class="bash">
+						sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+						</code>
+						<code class="bash">
+						sudo apt update
+						</code>
+						<code class="bash">
+						sudo apt install docker-ce=18.06.0~ce~3-0~ubuntu # Last compatible Version at 2018/11/19
+						</code>
+						<code class="bash">
+						sudo systemctl enable docker
+						</code>
+					</li>
+					<li>
+						Install kubeadm, kubellet and kubectl:
+						<br>
+						<a href="https://kubernetes.io/docs/setup/independent/install-kubeadm/" target="_blank" style="text-decoration: underline;">
+						Kubernetes.io - Install kubeadm</a>
+						<br>
+						<code class="bash">
+						sudo apt install -y apt-transport-https curl
+						</code>
+						<code class="bash">
+						sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+						</code>
+						<code class="bash">
+						sudo apt update && sudo apt install -y kubelet kubeadm kubectl
+						</code>
+					</li>
+					<li>
+						Prevent automatic package upgrades for the stack:
+						<code class="bash">
+						sudo apt-mark hold docker-ce kubelet kubeadm kubectl
+						</code>
+					</li>
+					<li>
+						Kubernetes needs swap to be disabled:
+						<code class="bash">
+						sudo swapoff -a
+						</code>
+						Also, check and disable '/etc/fstab' entries for swap
+					</li>
+					<li>
+						Create the k8s cluster:
+						<br>
+						I have chosen <a href="https://www.projectcalico.org/calico-networking-for-kubernetes/>" target="_blank" style="text-decoration: underline;">calico networking addon</a>
+						<br>. So I needed to run 'init' parameter with calico required option:
+						<code class="bash">
+						sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+						</code>
+						If everything is ok, look for this message at the end of the output:
+						<code class="bash">
+						Your Kubernetes master has initialized successfully!
+						</code>
+						Follow the instructions to use your kubeconfig file for remote connections to the cluster
+					</li>
+					<li>
+						Install CNI:
+						<br>
+						Run these commands from your local kubectl context pointing to the new cluster.
+						<br>
+						First, rbac security:
+						<code class="bash">
+						kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+						</code>
+						Finally, networking:
+						<code class="bash">
+						kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+						</code>
+					</li>
+					<li>
+						Look for ready master:
+						<br>
+						<code class="bash">
+						kubectl get nodes
+						</code>
+<pre>
+# Output
+NAME                     STATUS    ROLES     AGE       VERSION
+vmi*.contaboserver.net   Ready     master    75m       v*.*.*
+</pre>
+					</li>
+					<li>
+						As we are running a single node cluster, it's necessary to untaint the master node to be able to schedule pods:
+						<code class="bash">
+						kubectl taint nodes --all node-role.kubernetes.io/master-
+						</code>
+					</li>
+				</ol>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<p class="copyright">&copy; edumgui.cloud</p>
+					</footer>
+
+			</div>
+		<!-- BG -->
+			<div id="bg"></div>
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+	</body>
+</html>

@@ -70,6 +70,14 @@
 
 	}
 
+	.bash {
+		color: silver;
+		background: black;
+		border: 1px solid #000;
+		margin: 2px;
+		display: block;
+	  }
+
 	body {
 		background: #1b1f22;
 	}
